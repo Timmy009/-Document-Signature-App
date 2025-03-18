@@ -55,7 +55,7 @@ const RecentDocuments = ({
                 onClick={() => navigate("/upload/view/1")}
               >
                 {/* ✅ Preview Image or Random Placeholder */}
-                <div className="h-44 w-full">
+                <div className="h-40 w-full">
                   <img
                     src={
                       file.preview ||
@@ -66,11 +66,11 @@ const RecentDocuments = ({
                   />
                 </div>
 
-                <CardContent className="p-4 text-center flex flex-col justify-between flex-grow">
+                <CardContent className="p-12 text-center flex flex-col justify-between flex-grow">
                   <CardTitle className="text-base font-semibold truncate">
                     {file.name}
                   </CardTitle>
-                  <Text className="text-gray-500 text-sm mt-1">
+                  <Text className="text-gray-500 text-sm mt-0">
                     {file.uploadDate} | {file.status}
                   </Text>
                 </CardContent>
