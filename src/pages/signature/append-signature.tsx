@@ -8,6 +8,8 @@ import SignatureCanvas from "react-signature-canvas";
 import { Viewer, Worker } from "@react-pdf-viewer/core";
 import "@react-pdf-viewer/core/lib/styles/index.css";
 import { toast } from "sonner";
+import Mammoth from "mammoth";
+import parse from "html-react-parser";
 import { renderAsync } from "docx-preview";
 import DocViewer, { DocViewerRenderers } from "react-doc-viewer";
 import { PDFDocument } from "pdf-lib";
@@ -101,32 +103,20 @@ const AppendSignaturePage: React.FC = () => {
       toast.success("✅ Signed document saved successfully!");
       navigate("/profile");
     } catch (error) {
-      toast.error("❌ Error saving signed document.");
+      toast.error("❌ Can only sign a pdf file.");
       console.error("Error signing document:", error);
     }
   };
-  console.log("hddd", state);
-  const documents = fileUrl ? [{ uri: fileUrl }] : [];
-  const [localFileUrl, setLocalFileUrl] = useState<string | null>(null);
+
+  const [docxContent, setDocxContent] = useState<string | null>(null);
 
   useEffect(() => {
-    if (fileUrl && fileUrl.endsWith(".docx")) {
+    if (state.fileName?.endsWith(".docx")) {
       fetch(fileUrl)
-        .then((res) => res.blob())
-        .then((blob) => {
-          const reader = new FileReader();
-          reader.onload = (event) => {
-            if (event.target?.result && docxContainerRef.current) {
-              docxContainerRef.current.innerHTML = "";
-              renderAsync(
-                event.target.result as ArrayBuffer,
-                docxContainerRef.current
-              );
-            }
-          };
-          reader.readAsArrayBuffer(blob);
-        })
-        .catch(() => toast.error("Failed to load DOCX document."));
+        .then((res) => res.arrayBuffer())
+        .then((arrayBuffer) => Mammoth.convertToHtml({ arrayBuffer }))
+        .then((result) => setDocxContent(result.value))
+        .catch((err) => console.error("Error loading DOCX:", err));
     }
   }, [fileUrl]);
 
@@ -151,10 +141,15 @@ const AppendSignaturePage: React.FC = () => {
               <Viewer fileUrl={fileUrl} />
             </Worker>
           ) : state.fileName.endsWith(".docx") ? (
-            <div
-              ref={docxContainerRef}
-              className="w-full h-full overflow-auto p-4"
-            ></div>
+            <div className="w-full max-w-2xl h-[500px] border rounded-lg shadow-md bg-white p-6 overflow-auto text-gray-700">
+              {docxContent ? (
+                <div className="prose max-w-none">{parse(docxContent)}</div>
+              ) : (
+                <div className="flex items-center justify-center h-full text-gray-500">
+                  Loading document...
+                </div>
+              )}
+            </div>
           ) : (
             <p>Unsupported file format</p>
           )
