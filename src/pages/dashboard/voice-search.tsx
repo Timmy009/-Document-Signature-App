@@ -1,3 +1,4 @@
+import "regenerator-runtime/runtime";
 import { useEffect, useState } from "react";
 import { Mic, MicOff } from "lucide-react";
 import { Input } from "@/components/ui/input";
